@@ -13,7 +13,7 @@ def main():
     # ecg data in which each row is a temporal sequence data of continuous values
     ecg_data = pd.read_csv(data_dir_path + '/ecg_discord_test.csv', header=None)
     print(ecg_data.head())
-    ecg_np_data = ecg_data.as_matrix()
+    ecg_np_data = ecg_data.to_numpy()
     scaler = MinMaxScaler()
     ecg_np_data = scaler.fit_transform(ecg_np_data)
 

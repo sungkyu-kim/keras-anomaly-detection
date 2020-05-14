@@ -3,7 +3,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 from keras_anomaly_detection.library.feedforward import FeedForwardAutoEncoder
-from keras_anomaly_detection.demo.credit_card_demo.unzip_utils import unzip
+#from keras_anomaly_detection.demo.credit_card_demo.unzip_utils import unzip
 from keras_anomaly_detection.library.plot_utils import plot_confusion_matrix, plot_training_history, visualize_anomaly
 from keras_anomaly_detection.library.evaluation_utils import report_evaluation_metrics
 import numpy as np
@@ -15,8 +15,8 @@ def preprocess_data(csv_data):
     credit_card_data = csv_data.drop(labels=['Class', 'Time'], axis=1)
     credit_card_data['Amount'] = StandardScaler().fit_transform(credit_card_data['Amount'].values.reshape(-1, 1))
     # print(credit_card_data.head())
-    credit_card_np_data = credit_card_data.as_matrix()
-    y_true = csv_data['Class'].as_matrix()
+    credit_card_np_data = credit_card_data.to_numpy()
+    y_true = csv_data['Class'].to_numpy()
     return credit_card_np_data, y_true
 
 
@@ -27,7 +27,7 @@ def main():
     data_dir_path = './data'
     model_dir_path = './models'
 
-    unzip(data_dir_path + '/creditcardfraud.zip', data_dir_path)
+#    unzip(data_dir_path + '/creditcardfraud.zip', data_dir_path)
     csv_data = pd.read_csv(data_dir_path + '/creditcard.csv')
     estimated_negative_sample_ratio = 1 - csv_data['Class'].sum() / csv_data['Class'].count()
     print(estimated_negative_sample_ratio)
