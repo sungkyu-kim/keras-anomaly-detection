@@ -41,7 +41,7 @@ def main():
     # ecg data in which each row is a temporal sequence data of continuous values
     ecg_data = pd.read_csv(data_dir_path + '/ecg_discord_test.csv', header=None)
     print(ecg_data.head())
-    ecg_np_data = ecg_data.as_matrix()
+    ecg_np_data = ecg_data.to_numpy()
     scaler = MinMaxScaler()
     ecg_np_data = scaler.fit_transform(ecg_np_data)
 
@@ -81,7 +81,7 @@ def main():
     model_dir_path = './models'
     ecg_data = pd.read_csv(data_dir_path + '/ecg_discord_test.csv', header=None)
     print(ecg_data.head())
-    ecg_np_data = ecg_data.as_matrix()
+    ecg_np_data = ecg_data.to_numpy()
     scaler = MinMaxScaler()
     ecg_np_data = scaler.fit_transform(ecg_np_data)
     print(ecg_np_data.shape)
@@ -120,7 +120,7 @@ def main():
     model_dir_path = './models'
     ecg_data = pd.read_csv(data_dir_path + '/ecg_discord_test.csv', header=None)
     print(ecg_data.head())
-    ecg_np_data = ecg_data.as_matrix()
+    ecg_np_data = ecg_data.to_numpy()
     scaler = MinMaxScaler()
     ecg_np_data = scaler.fit_transform(ecg_np_data)
     print(ecg_np_data.shape)
@@ -159,7 +159,7 @@ def main():
     model_dir_path = './models'
     ecg_data = pd.read_csv(data_dir_path + '/ecg_discord_test.csv', header=None)
     print(ecg_data.head())
-    ecg_np_data = ecg_data.as_matrix()
+    ecg_np_data = ecg_data.to_numpy()
     scaler = MinMaxScaler()
     ecg_np_data = scaler.fit_transform(ecg_np_data)
     print(ecg_np_data.shape)
@@ -200,7 +200,7 @@ def main():
     # ecg data in which each row is a temporal sequence data of continuous values
     ecg_data = pd.read_csv(data_dir_path + '/ecg_discord_test.csv', header=None)
     print(ecg_data.head())
-    ecg_np_data = ecg_data.as_matrix()
+    ecg_np_data = ecg_data.to_numpy()
     scaler = MinMaxScaler()
     ecg_np_data = scaler.fit_transform(ecg_np_data)
 
@@ -252,8 +252,8 @@ def preprocess_data(csv_data):
     credit_card_data = csv_data.drop(labels=['Class', 'Time'], axis=1)
     credit_card_data['Amount'] = StandardScaler().fit_transform(credit_card_data['Amount'].values.reshape(-1, 1))
     # print(credit_card_data.head())
-    credit_card_np_data = credit_card_data.as_matrix()
-    y_true = csv_data['Class'].as_matrix()
+    credit_card_np_data = credit_card_data.to_numpy()
+    y_true = csv_data['Class'].to_numpy()
     return credit_card_np_data, y_true
 
 
@@ -330,8 +330,8 @@ def preprocess_data(csv_data):
     credit_card_data = csv_data.drop(labels=['Class', 'Time'], axis=1)
     credit_card_data['Amount'] = StandardScaler().fit_transform(credit_card_data['Amount'].values.reshape(-1, 1))
     # print(credit_card_data.head())
-    credit_card_np_data = credit_card_data.as_matrix()
-    y_true = csv_data['Class'].as_matrix()
+    credit_card_np_data = credit_card_data.to_numpy()
+    y_true = csv_data['Class'].to_numpy()
     return credit_card_np_data, y_true
 
 

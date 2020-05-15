@@ -13,7 +13,14 @@ DO_TRAINING = False
 
 def preprocess_data(csv_data):
     credit_card_data = csv_data.drop(labels=['Class', 'Time'], axis=1)
+    print('credit_card_data')
+    print(credit_card_data.shape)
+    print(credit_card_data.head)
     credit_card_data['Amount'] = StandardScaler().fit_transform(credit_card_data['Amount'].values.reshape(-1, 1))
+    print('credit_card_data')
+    print(credit_card_data.shape)
+    print(credit_card_data.head)
+
     # print(credit_card_data.head())
     credit_card_np_data = credit_card_data.to_numpy()
     y_true = csv_data['Class'].to_numpy()
@@ -29,10 +36,16 @@ def main():
 
 #    unzip(data_dir_path + '/creditcardfraud.zip', data_dir_path)
     csv_data = pd.read_csv(data_dir_path + '/creditcard.csv')
+    print('csv_data.shape')
+    print(csv_data.shape)
+    print('csv_data.head')
+    print(csv_data.head)
     estimated_negative_sample_ratio = 1 - csv_data['Class'].sum() / csv_data['Class'].count()
+    print('estimated_negative_sample_ratio')
     print(estimated_negative_sample_ratio)
     X, Y = preprocess_data(csv_data)
-    print(X.shape)
+    print('X.shape' + str(X.shape))
+    print('Y.shape' + str(Y.shape))
 
     ae = FeedForwardAutoEncoder()
 
