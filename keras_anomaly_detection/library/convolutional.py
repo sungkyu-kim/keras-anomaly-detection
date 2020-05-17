@@ -11,7 +11,7 @@ import numpy as np
 
 class Conv1DAutoEncoder(object):
     model_name = 'con1d-auto-encoder'
-    VERBOSE = 1
+    VERBOSE = 0
 
     def __init__(self):
         self.model = None

@@ -1,0 +1,9 @@
+
+
+
+ <<< save_infomation_data >>> 
+ db_file_name : ./data/ub.csv
+ dataframe.shape and size(102, 13)
+ X : (3,)
+ Y : (3,)
+ error_temp : [71, 3, 3, 3]

@@ -86,7 +86,7 @@ class FeedForwardAutoEncoder(object):
                                  batch_size=batch_size,
                                  shuffle=True,
                                  validation_data=(X_test, X_test),
-                                 verbose=1,
+                                 verbose=0,
                                  callbacks=[checkpointer]).history
 
         self.model.save_weights(weight_file_path)

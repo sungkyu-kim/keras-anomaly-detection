@@ -1,0 +1,23 @@
+
+
+
+ <<< save_information >>> 
+date_str : 0518_0723
+colum_list : ['courseoption1', 'courseoption2', 'ipmtemp', 'doorlock']
+error_list : ['NAN', 'UB', 'DC', 'DDC']
+start_time : 1589754194.919282
+
+
+ <<< save_information_data >>> 
+ db_file_name : ./data/ub.csv
+ dataframe.shape and size(102, 13)
+colum_list : ['courseoption1', 'courseoption2', 'ipmtemp', 'doorlock']
+error_list : ['NAN', 'UB', 'DC', 'DDC']
+ X : (3,)
+ Y : (3,)
+ error_temp : [71, 3, 3, 3]
+
+
+ <<< save_information_done >>> 
+ end_date_str : 0518_0724
+ duration : 1589754245.3417215

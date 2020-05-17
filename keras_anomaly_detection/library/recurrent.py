@@ -107,7 +107,7 @@ class LstmAutoEncoder(object):
 
 class CnnLstmAutoEncoder(object):
     model_name = 'cnn-lstm-auto-encoder'
-    VERBOSE = 1
+    VERBOSE = 0
 
     def __init__(self):
         self.model = None
@@ -178,6 +178,7 @@ class CnnLstmAutoEncoder(object):
 
         weight_file_path = CnnLstmAutoEncoder.get_weight_file(model_dir_path=model_dir_path)
         architecture_file_path = CnnLstmAutoEncoder.get_architecture_file(model_dir_path)
+#        architecture_file_path = model_dir_path + 'model.json'
         checkpoint = ModelCheckpoint(weight_file_path)
         self.model = CnnLstmAutoEncoder.create_model(self.time_window_size, metric=self.metric)
         open(architecture_file_path, 'w').write(self.model.to_json())
@@ -217,7 +218,7 @@ class CnnLstmAutoEncoder(object):
 
 class BidirectionalLstmAutoEncoder(object):
     model_name = 'bidirectional-lstm-auto-encoder'
-    VERBOSE = 1
+    VERBOSE = 0
 
     def __init__(self):
         self.model = None
