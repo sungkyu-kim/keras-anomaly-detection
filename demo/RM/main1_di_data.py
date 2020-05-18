@@ -28,19 +28,21 @@ def create_directory(directory_path):
             return None
         return directory_path
 
-def AutoEncoder_test(X_data, Y_data, sub_output_dir, num, model_name, ae) :
+def AutoEncoder_test(X_data, Y_data, sub_output_dir, num, model_name, ae, error_list) :
 
-    model_dir_path = sub_output_dir + model_name
+    model_dir_path = sub_output_dir + model_name + '/'
 
     anomaly_dir = model_dir_path + 'anomaly/'
-    png_dir  = model_dir_path + 'png/'
+    png_dir_1  = sub_output_dir + '0_png/'
+    png_dir_2 = model_dir_path + 'png/'
 
     create_directory(model_dir_path)
     create_directory(anomaly_dir)
-    create_directory(png_dir)
+    create_directory(png_dir_1)
+    create_directory(png_dir_2)
 
     # fit the data and save model into model_dir_path
-    ae.fit(X_data, model_dir_path=model_dir_path, estimated_negative_sample_ratio=0.9)
+    history = ae.fit(X_data, model_dir_path=model_dir_path, estimated_negative_sample_ratio=0.9)
 
     # load back the model saved in model_dir_path detect anomaly
     #ae.load_model(model_dir_path)
@@ -89,9 +91,10 @@ def AutoEncoder_test(X_data, Y_data, sub_output_dir, num, model_name, ae) :
     f5.close()
     f6.close()
     f7.close()
-    png_name_info = png_dir + str(num) + '_anomaly.png'
-    visualize_reconstruction_error(reconstruction_error, ae.threshold, Y_data, png_name_info, WINDOW_SIZE)
-
+    png_name_info_1 = png_dir_1 + str(num) + '_' + model_name + '_anomaly.png'
+    png_name_info_2 = png_dir_2 + str(num) + '_' + model_name + '_anomaly.png'
+    png_title = str(num) + '_'  + model_name
+    visualize_reconstruction_error(reconstruction_error, ae.threshold, Y_data, png_name_info_1, png_name_info_2, png_title, WINDOW_SIZE, error_list)
 
 def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
     np.random.seed(RANDOM_SEED)
@@ -116,25 +119,25 @@ def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
         scaler = MinMaxScaler()
         X_scaler_data = scaler.fit_transform(x_)
 
-        model_name = 'LstmAutoEncoder/'
+        model_name = 'LstmAutoEncoder'
         ae = LstmAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae)
+        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
 
-        model_name = 'CnnLstmAutoEncoder/'
+        model_name = 'CnnLstmAutoEncoder'
         ae = CnnLstmAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae)
+        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
 
-        model_name = 'Conv1DAutoEncoder/'
+        model_name = 'Conv1DAutoEncoder'
         ae = Conv1DAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae)
+        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
 
-        model_name = 'BidirectionalLstmAutoEncoder/'
+        model_name = 'BidirectionalLstmAutoEncoder'
         ae = BidirectionalLstmAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae)
+        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
 
-        model_name = 'FeedForwardAutoEncoder/'
+        model_name = 'FeedForwardAutoEncoder'
         ae = FeedForwardAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae)
+        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
     info.save_information_done(sub_output_dir)
 
 
