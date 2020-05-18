@@ -1,8 +1,10 @@
 import os
 import numpy as np
 import pandas as pd
+from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
-from keras_anomaly_detection.library.plot_utils import visualize_reconstruction_error
+from keras_anomaly_detection.library.plot_utils import visualize_reconstruction_error, visualize_anomaly, \
+    visualize_anomaly_errors, plot_training_history_file
 from keras_anomaly_detection.library.recurrent import CnnLstmAutoEncoder
 from keras_anomaly_detection.library.recurrent import LstmAutoEncoder
 from keras_anomaly_detection.library.convolutional import Conv1DAutoEncoder
@@ -13,9 +15,10 @@ import demo.RM.information as info
 import matplotlib.pyplot as plt
 import demo.RM.data as data
 import time
-DO_TRAINING = False
+
 RANDOM_SEED = 42
 WINDOW_SIZE = 5
+adjusted_threshold = 2
 
 def create_directory(directory_path):
     if os.path.exists(directory_path):
@@ -46,55 +49,45 @@ def AutoEncoder_test(X_data, Y_data, sub_output_dir, num, model_name, ae, error_
 
     # load back the model saved in model_dir_path detect anomaly
     #ae.load_model(model_dir_path)
-    anomaly_information = ae.anomaly(X_data)
+
+    if 0 :
+        _, Xtest, _, Ytest = train_test_split(X_data, Y_data, test_size=0.5, random_state=1004)
+    else :
+        Xtest = X_data
+        Ytest = Y_data
+
+
+    anomaly_information = ae.anomaly(Xtest, adjusted_threshold)
     reconstruction_error = []
+    Ypred = []
+
     file_name_info = anomaly_dir + str(num) + '_anomaly.txt'
-    f = open(file_name_info, mode='at')
-    f0 = open(model_dir_path + '0_anomaly.txt', mode='at')
-    f1 = open(model_dir_path + '1_anomaly.txt', mode='at')
-    f2 = open(model_dir_path + '2_anomaly.txt', mode='at')
-    f3 = open(model_dir_path + '3_anomaly.txt', mode='at')
-    f4 = open(model_dir_path + '4_anomaly.txt', mode='at')
-    f5 = open(model_dir_path + '5_anomaly.txt', mode='at')
-    f6 = open(model_dir_path + '6_anomaly.txt', mode='at')
-    f7 = open(model_dir_path + '7_anomaly.txt', mode='at')
+    f1 = open(file_name_info, mode='at')
+    f2 = open(model_dir_path + 'dist.csv', mode='at')
 
     for idx, (is_anomaly, dist) in enumerate(anomaly_information):
         temp_str = '# ' + str(idx) + ' is ' + ('abnormal' if is_anomaly else 'normal') + ' (dist: ' + str(dist) + ')'
         #print(temp_str)
-        f.write(temp_str + '\n')
+        f1.write(temp_str + '\n')
         index = Y_data[idx]
-        anomal_str = str(index) + ',' + str(dist)
-        if index == 0 :
-            f0.write(anomal_str+'\n')
-        if index == 1 :
-            f1.write(anomal_str+'\n')
-        if index == 2 :
-            f2.write(anomal_str+'\n')
-        if index == 3 :
-            f3.write(anomal_str+'\n')
-        if index == 4 :
-            f4.write(anomal_str+'\n')
-        if index == 5 :
-            f5.write(anomal_str+'\n')
-        if index == 6 :
-            f6.write(anomal_str+'\n')
-        if index == 7 :
-            f7.write(anomal_str+'\n')    
+        predicted_label = 1 if is_anomaly else 0
+        Ypred.append(predicted_label)
         reconstruction_error.append(dist)
-    f.close()
-    f0.close()
+
+        anomal_str = str(idx) + ',' + str(index) + ',' + str(dist)
+        f2.write(anomal_str+'\n')
+
     f1.close()
     f2.close()
-    f3.close()
-    f4.close()
-    f5.close()
-    f6.close()
-    f7.close()
+
     png_name_info_1 = png_dir_1 + str(num) + '_' + model_name + '_anomaly.png'
     png_name_info_2 = png_dir_2 + str(num) + '_' + model_name + '_anomaly.png'
-    png_title = str(num) + '_'  + model_name
+    png_title = str(num) + '_'  + model_name + '_' + str(len(X_data))
     visualize_reconstruction_error(reconstruction_error, ae.threshold, Y_data, png_name_info_1, png_name_info_2, png_title, WINDOW_SIZE, error_list)
+    plot_training_history_file(history, model_dir_path, num)
+
+    #visualize_anomaly(Ytest, reconstruction_error, adjusted_threshold)
+    visualize_anomaly_errors(Ytest, reconstruction_error, adjusted_threshold, error_list)
 
 def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
     np.random.seed(RANDOM_SEED)
@@ -105,7 +98,7 @@ def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
         create_directory(sub_output_dir)
 
     info.save_infomation(sub_output_dir, date_str, COLUM_LIST, ERROR_LIST)
-    X_data, Y_data = data.create_data(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST, is_di=True)
+    X_data, Y_data = data.create_data(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST, is_di=False)
     #data_dir_path = './data'
     #model_dir_path = './models'
     #datasets_dict = data.load_data(sub_output_dir)
@@ -113,31 +106,31 @@ def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
     #Y_data = datasets_dict['anomaly'][1]
 
     X_len = len(X_data)
-    for i in range (X_len) :
-        x_ = X_data[0]
-        y_ = Y_data[0]
-        scaler = MinMaxScaler()
-        X_scaler_data = scaler.fit_transform(x_)
+    x_ = X_data[0]
+    y_ = Y_data[0]
+    scaler = MinMaxScaler()
+    X_scaler_data = scaler.fit_transform(X_data)
+    i = 0
 
-        model_name = 'LstmAutoEncoder'
-        ae = LstmAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
+    model_name = 'LstmAutoEncoder'
+    ae = LstmAutoEncoder()
+    AutoEncoder_test(X_scaler_data, Y_data, sub_output_dir, i, model_name, ae, ERROR_LIST)
 
-        model_name = 'CnnLstmAutoEncoder'
-        ae = CnnLstmAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
+    model_name = 'CnnLstmAutoEncoder'
+    ae = CnnLstmAutoEncoder()
+    AutoEncoder_test(X_scaler_data, Y_data, sub_output_dir, i, model_name, ae, ERROR_LIST)
 
-        model_name = 'Conv1DAutoEncoder'
-        ae = Conv1DAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
+    model_name = 'Conv1DAutoEncoder'
+    ae = Conv1DAutoEncoder()
+    AutoEncoder_test(X_scaler_data, Y_data, sub_output_dir, i, model_name, ae, ERROR_LIST)
 
-        model_name = 'BidirectionalLstmAutoEncoder'
-        ae = BidirectionalLstmAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
+    model_name = 'BidirectionalLstmAutoEncoder'
+    ae = BidirectionalLstmAutoEncoder()
+    AutoEncoder_test(X_scaler_data, Y_data, sub_output_dir, i, model_name, ae, ERROR_LIST)
 
-        model_name = 'FeedForwardAutoEncoder'
-        ae = FeedForwardAutoEncoder()
-        AutoEncoder_test(X_scaler_data, y_, sub_output_dir, i, model_name, ae, ERROR_LIST)
+    model_name = 'FeedForwardAutoEncoder'
+    ae = FeedForwardAutoEncoder()
+    AutoEncoder_test(X_scaler_data, Y_data, sub_output_dir, i, model_name, ae, ERROR_LIST)
     info.save_information_done(sub_output_dir)
 
 
@@ -145,7 +138,7 @@ def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
 #if __name__ == '__main__':
 #    main()
 DATA_DIR = './data/'
-RESULT_DIR = './results/1_di'
+RESULT_DIR = './results/2_full/'
 date_str = time.strftime("%m%d_%H%M")
 #test_str = DATASET_NAME[TEST_NUM]+ "/" + date_str
 output_dir = RESULT_DIR + date_str + '/'

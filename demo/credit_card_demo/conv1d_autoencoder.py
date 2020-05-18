@@ -62,6 +62,9 @@ def main():
         Ypred.append(predicted_label)
         reconstruction_error.append(dist)
 
+    print('reconstruction_error')
+    print(reconstruction_error)
+
     report_evaluation_metrics(Ytest, Ypred)
     plot_training_history(history)
     visualize_anomaly(Ytest, reconstruction_error, adjusted_threshold)

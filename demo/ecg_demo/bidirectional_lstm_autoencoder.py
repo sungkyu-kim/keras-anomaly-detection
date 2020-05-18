@@ -3,7 +3,7 @@ from sklearn.preprocessing import MinMaxScaler
 from keras_anomaly_detection.library.plot_utils import visualize_reconstruction_error
 from keras_anomaly_detection.library.recurrent import BidirectionalLstmAutoEncoder
 
-DO_TRAINING = False
+DO_TRAINING = True
 
 
 def main():

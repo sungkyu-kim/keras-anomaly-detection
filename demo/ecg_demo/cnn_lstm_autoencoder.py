@@ -2,6 +2,7 @@ import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
 from keras_anomaly_detection.library.plot_utils import visualize_reconstruction_error
 from keras_anomaly_detection.library.recurrent import CnnLstmAutoEncoder
+import matplotlib.pyplot as plt
 
 DO_TRAINING = False
 
@@ -12,9 +13,9 @@ def main():
     ecg_data = pd.read_csv(data_dir_path + '/ecg_discord_test.csv', header=None)
     print(ecg_data.head())
     ecg_np_data = ecg_data.to_numpy()
+
     scaler = MinMaxScaler()
     ecg_np_data = scaler.fit_transform(ecg_np_data)
-    print(ecg_np_data.shape)
 
     ae = CnnLstmAutoEncoder()
 
