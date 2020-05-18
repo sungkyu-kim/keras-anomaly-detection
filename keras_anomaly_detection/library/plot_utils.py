@@ -17,6 +17,33 @@ def plot_confusion_matrix(y_true, y_pred):
     plt.xlabel('Predicted class')
     plt.show()
 
+def plot_confusion_matrix_file(y_true, y_pred, confusion_dir_1, confusion_dir_2, num, model_name):
+
+    output_file_1 = confusion_dir_1 + str(num) + '_' + model_name + '_confusion.png'
+    output_file_2 = confusion_dir_2 + str(num) + '_' + model_name + '_confusion.png'
+
+    y_true_, y_pred_ = [], []
+    for i in range (len(y_true)) :
+        if y_true[i] > 0 :
+            y_true_.append(1)
+        else :
+            y_true_.append(0)
+        if y_pred[i] > 0 :
+            y_pred_.append(1)
+        else :
+            y_pred_.append(0)
+
+
+    conf_matrix = confusion_matrix(y_true_, y_pred_)
+
+    plt.figure(figsize=(12, 12))
+    sns.heatmap(conf_matrix, xticklabels=LABELS, yticklabels=LABELS, annot=True, fmt="d")
+    plt.title("Confusion matrix")
+    plt.ylabel('True class')
+    plt.xlabel('Predicted class')
+    plt.savefig(output_file_1)
+    plt.savefig(output_file_2)
+    plt.show()
 
 def plot_training_history(history):
     if history is None:
@@ -61,7 +88,8 @@ def visualize_anomaly(y_true, reconstruction_error, threshold):
     plt.xlabel("Data point index")
     plt.show()
 
-def visualize_anomaly_errors(y_true, reconstruction_error, threshold, error_list):
+def visualize_anomaly_errors(y_true, reconstruction_error, threshold, error_list, png_title, output_dir, num):
+    output_file = output_dir + 'loss_' + str(num) + '.png'
     error_df = pd.DataFrame({'reconstruction_error': reconstruction_error,
                              'true_class': y_true})
     print(error_df.describe())
@@ -78,12 +106,12 @@ def visualize_anomaly_errors(y_true, reconstruction_error, threshold, error_list
 
     ax.hlines(threshold, ax.get_xlim()[0], ax.get_xlim()[1], colors="r", zorder=100, label='Threshold')
     ax.legend()
-    plt.title("Reconstruction error for different classes")
+    #plt.title("Reconstruction error for different classes")
+    plt.title(png_title)
     plt.ylabel("Reconstruction error")
     plt.xlabel("Data point index")
+    plt.savefig(output_file)
     plt.show()
-
-
 
 def visualize_reconstruction_error(reconstruction_error, threshold, Y_data, png_name_info_1, png_name_info_2, png_title, windowsize, error_list):
     plt.clf()

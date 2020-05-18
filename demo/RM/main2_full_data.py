@@ -4,12 +4,13 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 from keras_anomaly_detection.library.plot_utils import visualize_reconstruction_error, visualize_anomaly, \
-    visualize_anomaly_errors, plot_training_history_file
+    visualize_anomaly_errors, plot_training_history_file, plot_confusion_matrix_file
 from keras_anomaly_detection.library.recurrent import CnnLstmAutoEncoder
 from keras_anomaly_detection.library.recurrent import LstmAutoEncoder
 from keras_anomaly_detection.library.convolutional import Conv1DAutoEncoder
 from keras_anomaly_detection.library.recurrent import BidirectionalLstmAutoEncoder
 from keras_anomaly_detection.library.feedforward import FeedForwardAutoEncoder
+from keras_anomaly_detection.library.evaluation_utils import report_evaluation_metrics_file
 import demo.RM.information as info
 
 import matplotlib.pyplot as plt
@@ -36,16 +37,31 @@ def AutoEncoder_test(X_data, Y_data, sub_output_dir, num, model_name, ae, error_
     model_dir_path = sub_output_dir + model_name + '/'
 
     anomaly_dir = model_dir_path + 'anomaly/'
-    png_dir_1  = sub_output_dir + '0_png/'
+    png_dir_1  = sub_output_dir + '1_png/'
     png_dir_2 = model_dir_path + 'png/'
+    metrics_dir_1 = sub_output_dir + '2_metrics/'
+    metrics_dir_2 = model_dir_path + 'metrics/'
+    confusion_dir_1 = sub_output_dir + '3_confusion/'
+    confusion_dir_2 = model_dir_path + 'confusion/'
 
     create_directory(model_dir_path)
     create_directory(anomaly_dir)
     create_directory(png_dir_1)
     create_directory(png_dir_2)
+    create_directory(metrics_dir_1)
+    create_directory(metrics_dir_2)
+    create_directory(confusion_dir_1)
+    create_directory(confusion_dir_2)
+
+    x_size = len(X_data)
+    y_size = 0
+    for i in range (x_size) :
+        if Y_data[i] == 0 :
+            y_size +=1
+    estimated_negative_sample_ratio = y_size / x_size
 
     # fit the data and save model into model_dir_path
-    history = ae.fit(X_data, model_dir_path=model_dir_path, estimated_negative_sample_ratio=0.9)
+    history = ae.fit(X_data, model_dir_path=model_dir_path, estimated_negative_sample_ratio=estimated_negative_sample_ratio)
 
     # load back the model saved in model_dir_path detect anomaly
     #ae.load_model(model_dir_path)
@@ -56,7 +72,7 @@ def AutoEncoder_test(X_data, Y_data, sub_output_dir, num, model_name, ae, error_
         Xtest = X_data
         Ytest = Y_data
 
-
+    adjusted_threshold = ae.threshold
     anomaly_information = ae.anomaly(Xtest, adjusted_threshold)
     reconstruction_error = []
     Ypred = []
@@ -87,7 +103,9 @@ def AutoEncoder_test(X_data, Y_data, sub_output_dir, num, model_name, ae, error_
     plot_training_history_file(history, model_dir_path, num)
 
     #visualize_anomaly(Ytest, reconstruction_error, adjusted_threshold)
-    visualize_anomaly_errors(Ytest, reconstruction_error, adjusted_threshold, error_list)
+    visualize_anomaly_errors(Ytest, reconstruction_error, adjusted_threshold, error_list, png_title, model_dir_path, num)
+    report_evaluation_metrics_file(Ytest, Ypred, metrics_dir_1, metrics_dir_2, num, model_name)
+    plot_confusion_matrix_file(Ytest, Ypred, confusion_dir_1, confusion_dir_2, num, model_name)
 
 def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
     np.random.seed(RANDOM_SEED)

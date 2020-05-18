@@ -2,12 +2,14 @@ import os
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler
-from keras_anomaly_detection.library.plot_utils import visualize_reconstruction_error
+from keras_anomaly_detection.library.plot_utils import visualize_reconstruction_error, plot_training_history_file, \
+    plot_confusion_matrix_file, visualize_anomaly_errors
 from keras_anomaly_detection.library.recurrent import CnnLstmAutoEncoder
 from keras_anomaly_detection.library.recurrent import LstmAutoEncoder
 from keras_anomaly_detection.library.convolutional import Conv1DAutoEncoder
 from keras_anomaly_detection.library.recurrent import BidirectionalLstmAutoEncoder
 from keras_anomaly_detection.library.feedforward import FeedForwardAutoEncoder
+from keras_anomaly_detection.library.evaluation_utils import report_evaluation_metrics_file
 import demo.RM.information as info
 
 import matplotlib.pyplot as plt
@@ -16,6 +18,7 @@ import time
 DO_TRAINING = False
 RANDOM_SEED = 42
 WINDOW_SIZE = 5
+adjusted_threshold = 2
 
 def create_directory(directory_path):
     if os.path.exists(directory_path):
@@ -33,68 +36,67 @@ def AutoEncoder_test(X_data, Y_data, sub_output_dir, num, model_name, ae, error_
     model_dir_path = sub_output_dir + model_name + '/'
 
     anomaly_dir = model_dir_path + 'anomaly/'
-    png_dir_1  = sub_output_dir + '0_png/'
+    png_dir_1  = sub_output_dir + '1_png/'
     png_dir_2 = model_dir_path + 'png/'
+    metrics_dir_1 = sub_output_dir + '2_metrics/'
+    metrics_dir_2 = model_dir_path + 'metrics/'
+    confusion_dir_1 = sub_output_dir + '3_confusion/'
+    confusion_dir_2 = model_dir_path + 'confusion/'
 
     create_directory(model_dir_path)
     create_directory(anomaly_dir)
     create_directory(png_dir_1)
     create_directory(png_dir_2)
+    create_directory(metrics_dir_1)
+    create_directory(metrics_dir_2)
+    create_directory(confusion_dir_1)
+    create_directory(confusion_dir_2)
+
+    x_size = len(X_data)
+    y_size = 0
+    for i in range (x_size) :
+        if Y_data[i] == 0 :
+            y_size +=1
+    estimated_negative_sample_ratio = y_size / x_size
 
     # fit the data and save model into model_dir_path
-    history = ae.fit(X_data, model_dir_path=model_dir_path, estimated_negative_sample_ratio=0.9)
+    history = ae.fit(X_data, model_dir_path=model_dir_path, estimated_negative_sample_ratio=estimated_negative_sample_ratio)
 
     # load back the model saved in model_dir_path detect anomaly
     #ae.load_model(model_dir_path)
     anomaly_information = ae.anomaly(X_data)
     reconstruction_error = []
     file_name_info = anomaly_dir + str(num) + '_anomaly.txt'
-    f = open(file_name_info, mode='at')
-    f0 = open(model_dir_path + '0_anomaly.txt', mode='at')
-    f1 = open(model_dir_path + '1_anomaly.txt', mode='at')
-    f2 = open(model_dir_path + '2_anomaly.txt', mode='at')
-    f3 = open(model_dir_path + '3_anomaly.txt', mode='at')
-    f4 = open(model_dir_path + '4_anomaly.txt', mode='at')
-    f5 = open(model_dir_path + '5_anomaly.txt', mode='at')
-    f6 = open(model_dir_path + '6_anomaly.txt', mode='at')
-    f7 = open(model_dir_path + '7_anomaly.txt', mode='at')
+    f1 = open(file_name_info, mode='at')
+    f2 = open(model_dir_path + 'dist.csv', mode='at')
 
+    Ypred = []
     for idx, (is_anomaly, dist) in enumerate(anomaly_information):
         temp_str = '# ' + str(idx) + ' is ' + ('abnormal' if is_anomaly else 'normal') + ' (dist: ' + str(dist) + ')'
         #print(temp_str)
-        f.write(temp_str + '\n')
+        f1.write(temp_str + '\n')
         index = Y_data[idx]
-        anomal_str = str(index) + ',' + str(dist)
-        if index == 0 :
-            f0.write(anomal_str+'\n')
-        if index == 1 :
-            f1.write(anomal_str+'\n')
-        if index == 2 :
-            f2.write(anomal_str+'\n')
-        if index == 3 :
-            f3.write(anomal_str+'\n')
-        if index == 4 :
-            f4.write(anomal_str+'\n')
-        if index == 5 :
-            f5.write(anomal_str+'\n')
-        if index == 6 :
-            f6.write(anomal_str+'\n')
-        if index == 7 :
-            f7.write(anomal_str+'\n')    
+
+        predicted_label = 1 if is_anomaly else 0
+        Ypred.append(predicted_label)
         reconstruction_error.append(dist)
-    f.close()
-    f0.close()
+
+        anomal_str = str(idx) + ',' + str(index) + ',' + str(dist)
+        f2.write(anomal_str+'\n')
+
     f1.close()
     f2.close()
-    f3.close()
-    f4.close()
-    f5.close()
-    f6.close()
-    f7.close()
+    adjusted_threshold = ae.threshold
     png_name_info_1 = png_dir_1 + str(num) + '_' + model_name + '_anomaly.png'
     png_name_info_2 = png_dir_2 + str(num) + '_' + model_name + '_anomaly.png'
-    png_title = str(num) + '_'  + model_name
+    png_title = str(num) + '_' + model_name + '_' + str(len(X_data))
     visualize_reconstruction_error(reconstruction_error, ae.threshold, Y_data, png_name_info_1, png_name_info_2, png_title, WINDOW_SIZE, error_list)
+    plot_training_history_file(history, model_dir_path, num)
+
+    visualize_anomaly_errors(Y_data, reconstruction_error, adjusted_threshold, error_list, png_title, model_dir_path, num)
+    report_evaluation_metrics_file(Y_data, Ypred, metrics_dir_1, metrics_dir_2, num, model_name)
+    plot_confusion_matrix_file(Y_data, Ypred, confusion_dir_1, confusion_dir_2, num, model_name)
+
 
 def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
     np.random.seed(RANDOM_SEED)
@@ -145,7 +147,7 @@ def main_test(db_file_name, sub_output_dir, COLUM_LIST, ERROR_LIST):
 #if __name__ == '__main__':
 #    main()
 DATA_DIR = './data/'
-RESULT_DIR = './results/1_di'
+RESULT_DIR = './results/1_di/'
 date_str = time.strftime("%m%d_%H%M")
 #test_str = DATASET_NAME[TEST_NUM]+ "/" + date_str
 output_dir = RESULT_DIR + date_str + '/'
