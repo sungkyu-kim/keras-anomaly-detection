@@ -12,11 +12,9 @@ def report_evaluation_metrics(y_true, y_pred):
     print('Recall: {0:0.2f}'.format(recall))
     print('F1: {0:0.2f}'.format(f1))
 
-def report_evaluation_metrics_file(y_true, y_pred, metrics_dir_1, metrics_dir_2, num, model_name):
+def report_evaluation_metrics_file(y_true, y_pred, metrics_dir_1, metrics_dir_2, title, model_name):
 
     output_file_1 = metrics_dir_1 + model_name + '_evaluation.txt'
-    info_str = str(num) + '_' + model_name + '_evaluation'
-    output_file_2 = metrics_dir_2 + str(num) + '_' + model_name + '_evaluation.txt'
 
     y_true_, y_pred_ = [], []
     for i in range (len(y_true)) :
@@ -40,16 +38,19 @@ def report_evaluation_metrics_file(y_true, y_pred, metrics_dir_1, metrics_dir_2,
     print('F1: {0:0.2f}'.format(f1))
 
     f = open(output_file_1, mode='at')
-    f.write('\n' + info_str + '\n')
+    f.write('\n' + title + '\n')
     f.write('Average precision-recall score: {0:0.2f}\n'.format(average_precision))
     f.write('Precision: {0:0.2f}\n'.format(precision))
     f.write('Recall: {0:0.2f}\n'.format(recall))
     f.write('F1: {0:0.2f}\n'.format(f1))
     f.close()
 
-    f = open(output_file_2, mode='at')
-    f.write('Average precision-recall score: {0:0.2f}\n'.format(average_precision))
-    f.write('Precision: {0:0.2f}\n'.format(precision))
-    f.write('Recall: {0:0.2f}\n'.format(recall))
-    f.write('F1: {0:0.2f}\n'.format(f1))
-    f.close()
+    if metrics_dir_2 != 'NULL' :
+        output_file_2 = metrics_dir_2 + title + '_evaluation.txt'
+        f = open(output_file_2, mode='at')
+        f.write('\n' + title + '\n')
+        f.write('Average precision-recall score: {0:0.2f}\n'.format(average_precision))
+        f.write('Precision: {0:0.2f}\n'.format(precision))
+        f.write('Recall: {0:0.2f}\n'.format(recall))
+        f.write('F1: {0:0.2f}\n'.format(f1))
+        f.close()

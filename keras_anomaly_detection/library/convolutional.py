@@ -68,6 +68,12 @@ class Conv1DAutoEncoder(object):
         checkpoint = ModelCheckpoint(weight_file_path)
         self.model = self.create_model(self.time_window_size, metric=self.metric)
         open(architecture_file_path, 'w').write(self.model.to_json())
+        print('input_timeseries_dataset.shape')
+        print(input_timeseries_dataset.shape)
+        print(input_timeseries_dataset)
+        print('dataset.shape')
+        print(dataset.shape)
+        print(dataset)
         history = self.model.fit(x=input_timeseries_dataset, y=dataset,
                                  batch_size=batch_size, epochs=epochs,
                                  verbose=self.VERBOSE, validation_split=validation_split,

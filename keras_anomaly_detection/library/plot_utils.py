@@ -17,10 +17,10 @@ def plot_confusion_matrix(y_true, y_pred):
     plt.xlabel('Predicted class')
     plt.show()
 
-def plot_confusion_matrix_file(y_true, y_pred, confusion_dir_1, confusion_dir_2, num, model_name):
+def plot_confusion_matrix_file(y_true, y_pred, confusion_dir_1, confusion_dir_2, png_title):
 
-    output_file_1 = confusion_dir_1 + str(num) + '_' + model_name + '_confusion.png'
-    output_file_2 = confusion_dir_2 + str(num) + '_' + model_name + '_confusion.png'
+    output_file_1 = confusion_dir_1 + png_title + '_confusion.png'
+    output_file_2 = confusion_dir_2 + png_title + '_confusion.png'
 
     y_true_, y_pred_ = [], []
     for i in range (len(y_true)) :
@@ -33,7 +33,6 @@ def plot_confusion_matrix_file(y_true, y_pred, confusion_dir_1, confusion_dir_2,
         else :
             y_pred_.append(0)
 
-
     conf_matrix = confusion_matrix(y_true_, y_pred_)
 
     plt.figure(figsize=(12, 12))
@@ -43,7 +42,7 @@ def plot_confusion_matrix_file(y_true, y_pred, confusion_dir_1, confusion_dir_2,
     plt.xlabel('Predicted class')
     plt.savefig(output_file_1)
     plt.savefig(output_file_2)
-    plt.show()
+    #plt.show()
 
 def plot_training_history(history):
     if history is None:
@@ -56,18 +55,6 @@ def plot_training_history(history):
     plt.legend(['train', 'test'], loc='upper right')
     plt.show()
 
-def plot_training_history_file(history, output_dir, num):
-    if history is None:
-        return
-    output_file = output_dir + 'loss_'+str(num)+'.png'
-    plt.plot(history['loss'])
-    plt.plot(history['val_loss'])
-    plt.title('model loss')
-    plt.ylabel('loss')
-    plt.xlabel('epoch')
-    plt.legend(['train', 'test'], loc='upper right')
-    plt.savefig(output_file)
-    plt.show()
 
 def visualize_anomaly(y_true, reconstruction_error, threshold):
     error_df = pd.DataFrame({'reconstruction_error': reconstruction_error,
@@ -88,33 +75,13 @@ def visualize_anomaly(y_true, reconstruction_error, threshold):
     plt.xlabel("Data point index")
     plt.show()
 
-def visualize_anomaly_errors(y_true, reconstruction_error, threshold, error_list, png_title, output_dir, num):
-    output_file = output_dir + 'loss_' + str(num) + '.png'
-    error_df = pd.DataFrame({'reconstruction_error': reconstruction_error,
-                             'true_class': y_true})
-    print(error_df.describe())
 
-    groups = error_df.groupby('true_class')
-    fig, ax = plt.subplots()
 
-    error_name = ["Normal"]
-    for i in range(1, len(error_list)) :
-        error_name.append(error_list[i])
-
-    for name, group in groups:
-        ax.plot(group.index, group.reconstruction_error, marker='o', ms=3.5, linestyle='', label=error_name[name])
-
-    ax.hlines(threshold, ax.get_xlim()[0], ax.get_xlim()[1], colors="r", zorder=100, label='Threshold')
-    ax.legend()
-    #plt.title("Reconstruction error for different classes")
-    plt.title(png_title)
-    plt.ylabel("Reconstruction error")
-    plt.xlabel("Data point index")
-    plt.savefig(output_file)
-    plt.show()
-
-def visualize_reconstruction_error(reconstruction_error, threshold, Y_data, png_name_info_1, png_name_info_2, png_title, windowsize, error_list):
+def visualize_reconstruction_error(Y_data, reconstruction_error, threshold, gap_dir_1, gap_dir_2, png_title, windowsize, error_list):
     plt.clf()
+
+    gap_name_info_1 = gap_dir_1 + png_title + '_gap.png'
+    gap_name_info_2 = gap_dir_2 + png_title + '_gap.png'
 
     plt.plot(reconstruction_error, marker='o', ms=3.5, linestyle='', label='Point')
 
@@ -142,6 +109,49 @@ def visualize_reconstruction_error(reconstruction_error, threshold, Y_data, png_
     plt.ylabel("Reconstruction error")
     plt.xlabel("Data point index")
     plt.grid()
-    plt.savefig(png_name_info_1)
-    plt.savefig(png_name_info_2)
-    plt.show()
+    plt.savefig(gap_name_info_1)
+    plt.savefig(gap_name_info_2)
+    #plt.show()
+
+def visualize_anomaly_errors(Y_data, reconstruction_error, threshold, anomaly_dir_1, anomaly_dir_2, train_length, png_title, error_list):
+    anomaly_name_info_1 = anomaly_dir_1 + png_title + '_anomaly.png'
+    anomaly_name_info_2 = anomaly_dir_2 + png_title + '_anomaly.png'
+    
+    error_df = pd.DataFrame({'reconstruction_error': reconstruction_error, 'true_class': Y_data})
+    print(error_df.describe())
+
+    groups = error_df.groupby('true_class')
+    fig, ax = plt.subplots()
+
+    error_name = ["Normal"]
+    for i in range(1, len(error_list)) :
+        error_name.append(error_list[i])
+
+    for name, group in groups:
+        ax.plot(group.index, group.reconstruction_error, marker='o', ms=3.5, linestyle='', label=error_name[name])
+
+    ax.hlines(threshold, ax.get_xlim()[0], ax.get_xlim()[1], colors="r", zorder=100, label='Threshold')
+    ax.legend()
+    #plt.title("Reconstruction error for different classes")
+    plt.title(png_title)
+    plt.ylabel("Reconstruction error")
+    plt.xlabel("Data point index")
+    plt.savefig(anomaly_name_info_1)
+    plt.savefig(anomaly_name_info_2)
+    #plt.show()
+
+def plot_training_history_file(history, loss_dir_1, loss_dir_2, num):
+    if history is None:
+        return
+    plt.clf()
+    loss_dir_1_str = loss_dir_1 + 'loss_'+str(num)+'.png'
+    loss_dir_2_str = loss_dir_2 + 'loss_'+str(num)+'.png'
+    plt.plot(history['loss'])
+    plt.plot(history['val_loss'])
+    plt.title('model loss')
+    plt.ylabel('loss')
+    plt.xlabel('epoch')
+    plt.legend(['train', 'test'], loc='upper right')
+    plt.savefig(loss_dir_1_str)
+    plt.savefig(loss_dir_2_str)
+    #plt.show()
