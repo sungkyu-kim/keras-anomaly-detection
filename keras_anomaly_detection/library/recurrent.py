@@ -71,7 +71,7 @@ class LstmAutoEncoder(object):
         checkpoint = ModelCheckpoint(weight_file_path)
         self.model = LstmAutoEncoder.create_model(self.time_window_size, metric=self.metric)
         open(architecture_file_path, 'w').write(self.model.to_json())
-        self.model.fit(x=input_timeseries_dataset, y=timeseries_dataset,
+        history = self.model.fit(x=input_timeseries_dataset, y=timeseries_dataset,
                        batch_size=batch_size, epochs=epochs,
                        verbose=LstmAutoEncoder.VERBOSE, validation_split=validation_split,
                        callbacks=[checkpoint])
@@ -90,6 +90,7 @@ class LstmAutoEncoder(object):
         self.config['threshold'] = self.threshold
         config_file_path = LstmAutoEncoder.get_config_file(model_dir_path=model_dir_path)
         np.save(config_file_path, self.config)
+        return history
 
     def predict(self, timeseries_dataset):
         input_timeseries_dataset = np.expand_dims(timeseries_dataset, axis=2)
@@ -182,7 +183,7 @@ class CnnLstmAutoEncoder(object):
         checkpoint = ModelCheckpoint(weight_file_path)
         self.model = CnnLstmAutoEncoder.create_model(self.time_window_size, metric=self.metric)
         open(architecture_file_path, 'w').write(self.model.to_json())
-        self.model.fit(x=input_timeseries_dataset, y=timeseries_dataset,
+        history = self.model.fit(x=input_timeseries_dataset, y=timeseries_dataset,
                        batch_size=batch_size, epochs=epochs,
                        verbose=CnnLstmAutoEncoder.VERBOSE, validation_split=validation_split,
                        callbacks=[checkpoint])
@@ -201,6 +202,7 @@ class CnnLstmAutoEncoder(object):
         self.config['threshold'] = self.threshold
         config_file_path = CnnLstmAutoEncoder.get_config_file(model_dir_path=model_dir_path)
         np.save(config_file_path, self.config)
+        return history
 
     def predict(self, timeseries_dataset):
         input_timeseries_dataset = np.expand_dims(timeseries_dataset, axis=2)
@@ -288,7 +290,7 @@ class BidirectionalLstmAutoEncoder(object):
         checkpoint = ModelCheckpoint(weight_file_path)
         self.model = BidirectionalLstmAutoEncoder.create_model(self.time_window_size, metric=self.metric)
         open(architecture_file_path, 'w').write(self.model.to_json())
-        self.model.fit(x=input_timeseries_dataset, y=timeseries_dataset,
+        history = self.model.fit(x=input_timeseries_dataset, y=timeseries_dataset,
                        batch_size=batch_size, epochs=epochs,
                        verbose=BidirectionalLstmAutoEncoder.VERBOSE, validation_split=validation_split,
                        callbacks=[checkpoint])
@@ -307,6 +309,7 @@ class BidirectionalLstmAutoEncoder(object):
         self.config['threshold'] = self.threshold
         config_file_path = BidirectionalLstmAutoEncoder.get_config_file(model_dir_path=model_dir_path)
         np.save(config_file_path, self.config)
+        return history
 
     def predict(self, timeseries_dataset):
         input_timeseries_dataset = np.expand_dims(timeseries_dataset, axis=2)

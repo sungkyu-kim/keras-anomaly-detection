@@ -6,7 +6,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MinMaxScaler
 TRAIN_RATE = 0.25
-DATA_SIZE = 10
+DATA_SIZE = 200
 
 def create_directory(directory_path):
     if os.path.exists(directory_path):
@@ -21,8 +21,8 @@ def create_directory(directory_path):
 
 def create_data_by_di_for_timestep(data, value, Xs, Ys, size, error_list, test_type, train_length):
     
-    if size < DATA_SIZE :
-        print('create_dataset_time_step return , size : '+ str(size))
+    if size < DATA_SIZE or size < train_length :
+        #print('create_dataset_time_step return , size : '+ str(size))
         return
 
     is_error_value = 0
@@ -31,8 +31,8 @@ def create_data_by_di_for_timestep(data, value, Xs, Ys, size, error_list, test_t
     for i in range(train_length) :
         for j in error_list:
             if (value[i] == j):
-                print('value is not clear')
-                break
+                #print('value is not clear')
+                return
 
     for i in range(size):
         error_value = 0
@@ -46,7 +46,7 @@ def create_data_by_di_for_timestep(data, value, Xs, Ys, size, error_list, test_t
 
     if is_error_value == 0 :
         if test_type != 4 :
-            print('is_error_value NULL')
+            #print('is_error_value NULL')
             return
 
     Xs.append(data)
@@ -147,7 +147,7 @@ def create_data(db_file_name, sub_output_dir, colum_list, error_list, test_type,
                 error_temp[Y[j]] += 1
 
     else :
-        X, Y = create_data_by_di(dataframe, colum_list, test_type, train_length)
+        X, Y = create_data_by_di(dataframe, colum_list, error_list, test_type, train_length)
 
         y_len  = len(Y)
         for i in range(y_len):
